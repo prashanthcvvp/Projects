@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title >Search</title>
+		<link rel="shortcut icon" href="pics/barcode-icon.png">
+		<link rel="stylesheet" href="bootstrap-3.3.4-dist/css/bootstrap.min.css"/>
+		<link rel="stylesheet" href="style.css"/>
+		<script src="angular.min.js"></script>
+		<script type="text/javascript" src="backend_app.js"></script>
+</head>
+<body ng-app="data_search"  >
+	<div id="bar_code_data" class="master_div" ng-controller="getData as get" >
+		<img id="logo_img" src="pics/barcode-icon.png" height="30%" width="100%"style="margin-left: 10px;" /><br>
+		<input class="form-control" type="text" id="bar_code" style="width: 100%; font-size: 20px; border: 2px solid black; font-family: Arial Black;" placeholder="Bar Code" ng-model="get.name"/>
+		<button type="button" class="btn btn-default" ng-click="get.bar_code_search()" style="width: 100%; font-size: 20px; font-family: Arial Black;">Search</button>
+		<table ng-repeat="(key,val) in resp">
+			
+			<h2>{{key}}</h2>
+			<tr ng-repeat="(key1,val1) in val" ng-show="ifData && (get.ifDataCheck(key1))">
+			<td>{{key1}} </td><td> {{val1}}</td>
+			</tr>
+			<tr ng-repeat="(key1,val1) in val" ng-show="!ifData && (get.ifDataCheck(key1))">
+			<td>{{key1}} </td>
+			<td><input type="text" ng-model="val[key1]"></td>
+			</tr>
+		</table>
+		<div><button class="btn btn-default" ng-show="!show_btn" ng-click="get.add_bar_code()">Add</button></div>
+			<div ng-repeat="(key,val) in resp">
+			<h2>{{key}}</h2>
+			<ul>
+			<li ng-repeat="(key1,val1) in val">{{key1}} : {{val1}}</li>
+			</ul>
+			
+		</div>
+	</div>
+	<div id="details">
+		
+		
+	</div>
+</body>
+</html>

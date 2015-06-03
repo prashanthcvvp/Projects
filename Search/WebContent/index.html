@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title >Search</title>
+		<link rel="shortcut icon" href="pics/barcode-icon.png">
+		<style type="text/css">
+			.mHover {
+				background-color: gray;
+			}
+			.seach_btn_css {
+				background-color: black;
+			}	
+			.error{
+				color:red;
+			}
+		</style>
+	<script type="text/javascript" src="jquery-1.11.2.js"></script>
+	<script type="text/javascript">
+		<!-- ************************************************************************** -->
+        $("document").ready(function(){
+        	
+            $("#search_btn").addClass("seach_btn_css");
+            $("#bar_code").focus();
+            $("#search_btn").click(onMouseClick);
+            $("#search_btn").on("mouseover mouseleave",onMouseOver);
+            
+        });
+        <!-- ************************************************************************** -->
+        function onMouseClick(evt){
+            var bar_code= $("#bar_code").val();
+        	if(bar_code.length>0){
+        		if(bar_code.length>6){
+        			if(bar_code.length<14){
+            			$.get("http://localhost:8080/Search/publisher",{name:bar_code,html:"false"}).done(function(data){
+            				response=JSON.parse(data);
+                			processData(response);
+            			});
+          				$("#bar_code_data").css("margin-top","0%");
+        			}else{
+        				$("#error_status").html("*Too long");
+        			}
+        		}else{
+        			$("#error_status").html("*Shoud be minimun of 7 digits long");
+        		}
+        	}else{
+        		$("#error_status").html("*Enter the bar code");
+        	}		
+        }
+        <!-- ************************************************************************** -->
+        function processData(data){
+        	$("#error_status").html("");
+        	$("#product_details").remove();
+        	$("#details").html("<center><table id='product_details' width='100%'></table></center>");
+        	$("#details").focus();
+        	$("#logo_img").remove();
+        	var value_json = data;
+        	var ifData=true;
+        	$.each(data,function(key,value){
+        		$("#details").append("<table id='"+key+"'></table>")
+        		$("#"+key).append("<caption><h2>"+key.toUpperCase()+"</h2></caption>");
+          		$.each(value,function(key1,value1){
+        			if((key1.indexOf("REF_CD")<0)&&(key1.indexOf("BSIN")<0)){
+        				if(value1.length>0){
+        					$("#"+key).append("<tr><td>"+key1 +"</td>\n<td> "+ value1+"</td></tr>");
+        				}else{
+        					if(key1.indexOf("GTIN_CD")==0){
+        						var bar_code= $("#bar_code").val();
+        						$("#"+key).append("<tr><td>"+key1 +"</td>\n<td> <input type='text' value='"+bar_code+"'id="+key1+"></td></tr>");
+        					}else if(key1.indexOf("BRAND_TYPE_CD")==0){
+        						$("#"+key).append("<tr><td>"+key1 +"</td>\n<td> <input type='radio' value=\"1\" id="+key1+" name='"+key1+"'>1<br> <input type='radio' value=\"2\" id="+key1+" name='"+key1+"'>2</td></tr>");
+        					}else{
+        						$("#"+key).append("<tr><td>"+key1 +"</td>\n<td> <input type='text' id="+key1+"></td></tr>");
+        					}
+        					ifData=false;
+        				}
+        			}
+        		});
+        	});
+    		if(!ifData){
+   			$("#details").append("<button id='add_data'>Add Product</button>");
+    			$("#add_data").click(function(){
+        			$.post("http://localhost:8080/Search/publisher",{"details":JSON.stringify(ifNoData(value_json))}).done(function(data){
+        				alert(data);
+        			});
+        		});
+    		}
+        }
+        <!-- ************************************************************************** -->
+        function ifNoData(json_key_values){
+        	var json_to_server=[];
+				$.each(json_key_values,function(key2,value2){
+					json_obj ={};
+					$.each(value2,function(key3,value3,index){
+							if(value3.indexOf("")<-1){
+								json_obj[key3]=value3;
+							}else{
+								var value4 = $("#"+key3).val();	
+    							json_obj[key3]=value4;
+							} 
+    				});
+					json_to_server.push(json_obj);
+				});
+				var bar_code=$("#bar_code").val();
+				json_bar_code={
+						"gtin_cd":bar_code
+				};
+				json_html={
+						"html":"true"
+				};
+				json_to_server.push(json_bar_code);
+				json_to_server.push(json_html);
+    			console.log(json_to_server);
+    			return json_to_server;
+        }
+        <!-- ************************************************************************** -->
+        function onMouseOver(evt){
+            //alert($("#bar_code").val());
+            $("#search_btn").toggleClass("seach_btn_css");
+            $("#search_btn").toggleClass("mHover");    
+        }
+        <!-- ************************************************************************** -->
+    </script>
+</head>
+<body>
+	<div id="bar_code_data" style="margin-left: 30%; margin-top: 0%">
+		<img id="logo_img" src="pics/barcode-icon.png" height="30%" width="60%"style="margin-left: 10px;" /><br>
+		<span id="error_status" class="error"></span><br> 
+		<input type="text" id="bar_code"style="width: 60%; font-size: 20px; border: 2px solid black; font-family: Arial Black;" placeholder="Bar Code" />
+			
+		<input type="image" id="search_btn" style="height: 5%; width: 5%;"src="pics/search.png" />
+	</div>
+	<div id="details"  style="margin-left: 30%; margin-top: 0%">
+		
+		
+	</div>
+</body>
+</html>

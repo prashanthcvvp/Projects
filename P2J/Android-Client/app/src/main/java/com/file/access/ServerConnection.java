@@ -36,7 +36,7 @@ import java.util.zip.ZipInputStream;
  * Created by prashanth on 6/27/15.
  */
 public class ServerConnection extends AsyncTask<Void, Void, Boolean> {
-    private static String path = "";
+    private static String path = "",parent;
     private static Context context;
     private ProgressDialog pg;
     /**************************************************************************************************************/
@@ -81,8 +81,8 @@ public class ServerConnection extends AsyncTask<Void, Void, Boolean> {
     /**************************************************************************************************************/
 
     public void receiveFileFromServer() {
-        String url_str = "http://10.0.2.2:8080/PDFToJPEG/PDFServlet";
-        // String url_str = "http://192.168.2.4:8080/PDFToJPEG/PDFServlet";
+        //String url_str = "http://10.0.2.2:8080/PDFToJPEG/PDFServlet";
+        String url_str = "http://sample-search1.rhcloud.com/p2j/PDFServlet";
 
         Log.d("p3", url_str);
         try {
@@ -95,7 +95,9 @@ public class ServerConnection extends AsyncTask<Void, Void, Boolean> {
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
             conn.setDoInput(true);
-            File myfile = new File(path);
+            conn.connect();
+
+            File myfile = new File(this.path);
             BufferedInputStream b_fis = new BufferedInputStream(new FileInputStream(myfile));
             byte[] buffer = new byte[(int) myfile.length()];
             Log.d("p3", String.valueOf(buffer.length));
@@ -119,9 +121,10 @@ public class ServerConnection extends AsyncTask<Void, Void, Boolean> {
             bos.close();
             b_is.close();
             zip_file_output_stream.close();
+            conn.disconnect();
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            Log.d("p3", e.getMessage());
+            Log.e("p3", e.getMessage());
             e.printStackTrace();
         }
     }

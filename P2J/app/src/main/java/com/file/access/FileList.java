@@ -43,4 +43,19 @@ public class FileList {
         }
         return array;
     }
+
+
+    public void deleteFile(String path){
+        new File(path).delete();
+    }
+
+    public String upDirection(String path){
+        String[] path_array = path.split("/");
+        StringBuilder path_builder = new StringBuilder();
+        path_builder.delete(0,path_builder.length());
+        for(int i=1;i<path_array.length-1;i++){
+            path_builder.append("/"+path_array[i]);
+        }
+        return path_builder.toString();
+    }
 }

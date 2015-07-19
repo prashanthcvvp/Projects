@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,7 +40,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     //private ArrayAdapter<String> adapter;
     private TextView status;
     private ImageButton convert_btn;
-    private Button up_btn;
+    private ImageButton up_btn, delete_btn;
     private Handler handler;
     private Runnable runnable;
     private String[] array_file_names;
@@ -59,7 +60,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         directory_list = (ListView) findViewById(R.id.listView);
         status = (TextView) findViewById(R.id.textView);
         convert_btn = (ImageButton) findViewById(R.id.convert_btn);
-        up_btn = (Button) findViewById(R.id.up_btn);
+        up_btn = (ImageButton) findViewById(R.id.up_btn);
+        delete_btn = (ImageButton) findViewById(R.id.delete_btn);
 
         file_list = new FileList();
         path = Environment.getExternalStorageDirectory().toString();
@@ -67,19 +69,20 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
         //adapter = new ArrayAdapter<String>();
         array_file_names = file_list.toArray(arrayList);
-        Rowelements rows = new Rowelements(MainActivity.this,R.layout.custom_row,array_file_names);
+        Rowelements rows = new Rowelements(MainActivity.this, R.layout.custom_row, array_file_names);
         directory_list.setAdapter(rows);
         directory_list.setOnItemClickListener(this);
 
         convert_btn.setOnClickListener(this);
         up_btn.setOnClickListener(this);
+        delete_btn.setOnClickListener(this);
         timerTask();
 
         AdView mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
-        Toolbar title_bar = (Toolbar)findViewById(R.id.toolbar);
+        Toolbar title_bar = (Toolbar) findViewById(R.id.toolbar);
         title_bar.setTitle(R.string.app_name);
         title_bar.setTitleTextColor(Color.rgb(185, 211, 238));
         title_bar.setSubtitle("Welcome");
@@ -89,7 +92,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         Display display = getWindowManager().getDefaultDisplay();
         Point point = new Point();
         display.getRealSize(point);
-        directory_list.setBottom(point.y-mAdView.getHeight());
+        directory_list.setBottom(point.y - mAdView.getHeight());
     }
 
     /**
@@ -113,12 +116,10 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -131,27 +132,29 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         int id_ = parent.getId();
         switch (id_) {
             case R.id.listView: {
-                parent.getChildAt(position).setBackgroundColor(Color.argb(100,57,73,171));
-                path_old = path;
-                path = path + "/" + array_file_names[position];
-                ArrayList<String> list = file_list.getFiles(path);
+                parent.getChildAt(position).setBackgroundColor(Color.argb(100, 57, 73, 171));
+
+                ArrayList<String> list = file_list.getFiles(path + "/" + array_file_names[position]);
 
                 if (list != null) {
-                    array_file_names=file_list.toArray(list);
-                    Rowelements rows = new Rowelements(MainActivity.this,R.layout.custom_row,array_file_names);
+
+                    path = path + "/" + array_file_names[position];
+                    path_old = path;
+                    array_file_names = file_list.toArray(list);
+
+                    Rowelements rows = new Rowelements(MainActivity.this, R.layout.custom_row, array_file_names);
                     directory_list.setAdapter(rows);
                 } else {
+                    path = path + "/" + array_file_names[position];
                     if (array_file_names[position].endsWith(".pdf")) {
                         status.setText(path);
-                        path = path_old;
-                    } else {
-                        if (array_file_names[position].endsWith(".jpg")) {
-                            Intent intent_image = new Intent();
-                            intent_image.setAction(Intent.ACTION_VIEW);
-                            intent_image.setDataAndType(Uri.fromFile(new File(path)), "image/*");
-                            startActivity(intent_image);
-                        }
+                    } else if (array_file_names[position].endsWith(".jpg")) {
+                        Intent intent_image = new Intent();
+                        intent_image.setAction(Intent.ACTION_VIEW);
+                        intent_image.setDataAndType(Uri.fromFile(new File(path)), "image/*");
+                        startActivity(intent_image);
                     }
+
                 }
                 break;
             }
@@ -170,8 +173,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 if (!status.getText().equals("")) {
                     handler.postDelayed(runnable, 0);
                     String[] str_array = status.getText().toString().split(".pdf");
-                    Log.d("p3","str --- "+str_array[0]);
-                    ServerConnection connection = new ServerConnection(path,str_array[0],MainActivity.this,handler,runnable);
+                    Log.d("p3", "str --- " + str_array[0]);
+                    ServerConnection connection = new ServerConnection(path, str_array[0], MainActivity.this, handler, runnable);
                     connection.execute();
                     path = path_old;
                 } else {
@@ -180,7 +183,17 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 break;
             case R.id.up_btn:
                 status.setText("");
+
                 path = path_old;
+                String up_str= file_list.upDirection(path);
+                Toast.makeText(getApplicationContext(), up_str, Toast.LENGTH_LONG).show();
+                updatePath(up_str);
+                path=up_str;
+                break;
+            case R.id.delete_btn:
+                file_list.deleteFile(path);
+                path = path_old;
+                Toast.makeText(getApplicationContext(), path, Toast.LENGTH_LONG).show();
                 updatePath(path);
                 break;
         }
@@ -193,8 +206,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     public void updatePath(String path_temp) {
         ArrayList<String> list = file_list.getFiles(path_temp);
         if (list != null) {
-            array_file_names=file_list.toArray(list);
-            directory_list.setAdapter(new Rowelements(MainActivity.this,R.layout.custom_row,array_file_names));
+            array_file_names = file_list.toArray(list);
+            directory_list.setAdapter(new Rowelements(MainActivity.this, R.layout.custom_row, array_file_names));
         }
     }
 
@@ -203,12 +216,12 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
      */
     public void timerTask() {
         handler = new Handler();
-         runnable= new Runnable() {
+        runnable = new Runnable() {
             @Override
             public void run() {
                 updatePath(path);
                 handler.postDelayed(this, 2000);
-                Log.d("p3","loop");
+                Log.d("p3", "loop");
             }
         };
     }

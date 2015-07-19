@@ -64,14 +64,22 @@
         android:layout_above="@+id/linearLayout"
         android:layout_alignParentEnd="true" />
 
-    <Button
-        android:id="@+id/up_btn"
+    <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/up_btn"
         android:background="@null"
-        android:text="Up"
-        android:layout_weight="1"
+        android:src="@drawable/back"
         android:layout_above="@+id/linearLayout"
         android:layout_toStartOf="@+id/convert_btn" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/delete_btn"
+        android:background="@null"
+        android:layout_above="@+id/linearLayout"
+        android:layout_toStartOf="@+id/up_btn"
+        android:src="@drawable/delete" />
 
 </RelativeLayout>

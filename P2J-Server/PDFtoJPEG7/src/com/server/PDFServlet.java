@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Random;
 
 import javax.servlet.ServletException;
@@ -35,7 +36,9 @@ public class PDFServlet extends HttpServlet {
 	 *      response)
 	 */
 	protected void doGet(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {
-		System.out.println("Get called");
+		PrintWriter pw = response.getWriter();
+		pw.println("Web Application Under Construction -- Only for tablet use.");
+		pw.close();
 
 	}
 

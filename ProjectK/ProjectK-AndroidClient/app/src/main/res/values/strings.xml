@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ProjectK</string>
+    <string name="title_activity_google_map">Map</string>
+    <string name="parameter">parameter</string>
+</resources>

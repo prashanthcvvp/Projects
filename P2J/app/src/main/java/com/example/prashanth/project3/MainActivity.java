@@ -1,6 +1,8 @@
 package com.example.prashanth.project3;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -33,17 +35,18 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 
-public class MainActivity extends Activity implements AdapterView.OnItemClickListener, View.OnClickListener {
+public class MainActivity extends Activity implements AdapterView.OnItemClickListener, View.OnClickListener, AdapterView.OnItemLongClickListener {
     private ListView directory_list;
     private FileList file_list;
-    private String path = "", path_old = "";
-    //private ArrayAdapter<String> adapter;
+    private String path = "",file_path="";
     private TextView status;
     private ImageButton convert_btn;
-    private ImageButton up_btn, delete_btn;
+    private ImageButton delete_btn;
+    private ImageButton up_btn;
     private Handler handler;
     private Runnable runnable;
     private String[] array_file_names;
+    private boolean is_long_click=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,22 +63,20 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         directory_list = (ListView) findViewById(R.id.listView);
         status = (TextView) findViewById(R.id.textView);
         convert_btn = (ImageButton) findViewById(R.id.convert_btn);
-        up_btn = (ImageButton) findViewById(R.id.up_btn);
         delete_btn = (ImageButton) findViewById(R.id.delete_btn);
-
+        up_btn=(ImageButton)findViewById(R.id.up_btn);
         file_list = new FileList();
         path = Environment.getExternalStorageDirectory().toString();
         ArrayList<String> arrayList = file_list.getFiles(path);
-
-        //adapter = new ArrayAdapter<String>();
         array_file_names = file_list.toArray(arrayList);
         Rowelements rows = new Rowelements(MainActivity.this, R.layout.custom_row, array_file_names);
         directory_list.setAdapter(rows);
         directory_list.setOnItemClickListener(this);
+        directory_list.setOnItemLongClickListener(this);
 
         convert_btn.setOnClickListener(this);
-        up_btn.setOnClickListener(this);
         delete_btn.setOnClickListener(this);
+        up_btn.setOnClickListener(this);
         timerTask();
 
         AdView mAdView = (AdView) findViewById(R.id.adView);
@@ -122,7 +123,32 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         }
         return super.onOptionsItemSelected(item);
     }
-
+    /**
+     * ******************************************************************************************************
+     */
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        file_path = path + "/" + array_file_names[position];
+        final AlertDialog.Builder alert_dialog = new AlertDialog.Builder(MainActivity.this);
+        alert_dialog.setTitle("P2J");
+        alert_dialog.setMessage("Do you want delete the file " + file_path + "?");
+        alert_dialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                file_list.deleteFile(file_path);
+                updatePath(path);
+            }
+        });
+        alert_dialog.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        alert_dialog.setIcon(R.drawable.p2j);
+        alert_dialog.show();
+        return true;
+    }
     /**
      * ******************************************************************************************************
      */
@@ -139,22 +165,20 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 if (list != null) {
 
                     path = path + "/" + array_file_names[position];
-                    path_old = path;
                     array_file_names = file_list.toArray(list);
 
                     Rowelements rows = new Rowelements(MainActivity.this, R.layout.custom_row, array_file_names);
                     directory_list.setAdapter(rows);
                 } else {
-                    path = path + "/" + array_file_names[position];
+                    file_path = path + "/" + array_file_names[position];
                     if (array_file_names[position].endsWith(".pdf")) {
-                        status.setText(path);
+                        status.setText(file_path);
                     } else if (array_file_names[position].endsWith(".jpg")) {
                         Intent intent_image = new Intent();
                         intent_image.setAction(Intent.ACTION_VIEW);
-                        intent_image.setDataAndType(Uri.fromFile(new File(path)), "image/*");
+                        intent_image.setDataAndType(Uri.fromFile(new File(file_path)), "image/*");
                         startActivity(intent_image);
                     }
-
                 }
                 break;
             }
@@ -173,28 +197,19 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 if (!status.getText().equals("")) {
                     handler.postDelayed(runnable, 0);
                     String[] str_array = status.getText().toString().split(".pdf");
-                    Log.d("p3", "str --- " + str_array[0]);
-                    ServerConnection connection = new ServerConnection(path, str_array[0], MainActivity.this, handler, runnable);
+                    Log.d("p3", "str --- " + file_path);
+                    ServerConnection connection = new ServerConnection(file_path, str_array[0], MainActivity.this, handler, runnable);
                     connection.execute();
-                    path = path_old;
                 } else {
                     Toast.makeText(getApplicationContext(), "Select a File", Toast.LENGTH_LONG).show();
                 }
                 break;
             case R.id.up_btn:
-                status.setText("");
-
-                path = path_old;
                 String up_str= file_list.upDirection(path);
                 Toast.makeText(getApplicationContext(), up_str, Toast.LENGTH_LONG).show();
                 updatePath(up_str);
                 path=up_str;
-                break;
-            case R.id.delete_btn:
-                file_list.deleteFile(path);
-                path = path_old;
-                Toast.makeText(getApplicationContext(), path, Toast.LENGTH_LONG).show();
-                updatePath(path);
+                status.setText(path);
                 break;
         }
 
@@ -236,4 +251,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         handler.removeCallbacks(runnable);
         finish();
     }
+
+    /**
+     * ******************************************************************************************************
+     */
 }

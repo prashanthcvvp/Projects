@@ -46,7 +46,15 @@ public class FileList {
 
 
     public void deleteFile(String path){
-        new File(path).delete();
+        File dir_or_folder = new File(path);
+        if(dir_or_folder.isDirectory()){
+            for(File file:dir_or_folder.listFiles()){
+                file.delete();
+            }
+            dir_or_folder.delete();
+        }else{
+            dir_or_folder.delete();
+        }
     }
 
     public String upDirection(String path){

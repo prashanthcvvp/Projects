@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.prashanth.project3.R;
 
@@ -43,6 +44,7 @@ public class ServerConnection extends AsyncTask<Void, Void, Boolean> {
     private ProgressDialog pg;
     private Handler handler;
     private Runnable runnable;
+    private boolean is_complete =true;
 
     /**************************************************************************************************************/
     public ServerConnection(String path,String folder_path, Context context,Handler handler,Runnable runnable) {
@@ -77,13 +79,16 @@ public class ServerConnection extends AsyncTask<Void, Void, Boolean> {
     protected Boolean doInBackground(Void... params) {
         receiveFileFromServer();
         unzipFolder();
-        Log.d("p3", "Success");
         return true;
     }
     /**************************************************************************************************************/
     @Override
     protected void onPostExecute(Boolean aBoolean) {
         super.onPostExecute(aBoolean);
+        if(!is_complete){
+            is_complete=true;
+            Toast.makeText(this.context.getApplicationContext(),"Could not connect to the server",Toast.LENGTH_LONG).show();
+        }
         this.handler.removeCallbacks(this.runnable);
         pg.dismiss();
 
@@ -97,13 +102,6 @@ public class ServerConnection extends AsyncTask<Void, Void, Boolean> {
 
         Log.d("p3", url_str);
         try {
-            File parent_folder = new File(folder_path);
-            if(!parent_folder.isDirectory()) {
-                parent_folder.mkdirs();
-            }
-            File zip_file = new File(parent_folder,"sample.zip");
-            BufferedOutputStream zip_file_output_stream = new BufferedOutputStream(new FileOutputStream(zip_file));
-            int size = 0;
 
             URL url = new URL(url_str);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -111,12 +109,20 @@ public class ServerConnection extends AsyncTask<Void, Void, Boolean> {
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.connect();
+            // output folder /////////////////////////////////////////////////////////
+            File parent_folder = new File(folder_path);
+            if(!parent_folder.isDirectory()) {
+                parent_folder.mkdirs();
+            }
+            File zip_file = new File(parent_folder,"sample.zip");
+            BufferedOutputStream zip_file_output_stream = new BufferedOutputStream(new FileOutputStream(zip_file));
+            int size = 0;
+            //////////////////////////////////////////////////////////////////////////
 
             File myfile = new File(this.path);
 
             BufferedInputStream b_fis = new BufferedInputStream(new FileInputStream(myfile));
             byte[] buffer = new byte[(int) myfile.length()];
-            Log.d("p3", String.valueOf(buffer.length));
             b_fis.read(buffer, 0, buffer.length);
 
             BufferedOutputStream bos = new BufferedOutputStream(conn.getOutputStream());
@@ -138,9 +144,9 @@ public class ServerConnection extends AsyncTask<Void, Void, Boolean> {
             b_is.close();
             zip_file_output_stream.close();
             conn.disconnect();
+            is_complete=true;
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            Log.e("p3", e.getMessage());
+            is_complete=false;
             e.printStackTrace();
         }
     }

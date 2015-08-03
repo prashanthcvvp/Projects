@@ -10,15 +10,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,7 +29,6 @@ import com.ui.Rowelements;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends Activity implements AdapterView.OnItemClickListener, View.OnClickListener, AdapterView.OnItemLongClickListener {
@@ -86,7 +82,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         Toolbar title_bar = (Toolbar) findViewById(R.id.toolbar);
         title_bar.setTitle(R.string.app_name);
         title_bar.setTitleTextColor(Color.rgb(185, 211, 238));
-        title_bar.setSubtitle("Welcome");
+        title_bar.setSubtitle("PDF to JPEG conveter");
         title_bar.setSubtitleTextColor(Color.rgb(185, 211, 238));
 
 
@@ -197,7 +193,6 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 if (!status.getText().equals("")) {
                     handler.postDelayed(runnable, 0);
                     String[] str_array = status.getText().toString().split(".pdf");
-                    Log.d("p3", "str --- " + file_path);
                     ServerConnection connection = new ServerConnection(file_path, str_array[0], MainActivity.this, handler, runnable);
                     connection.execute();
                 } else {
@@ -236,7 +231,6 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
             public void run() {
                 updatePath(path);
                 handler.postDelayed(this, 2000);
-                Log.d("p3", "loop");
             }
         };
     }

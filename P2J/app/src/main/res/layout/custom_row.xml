@@ -20,5 +20,5 @@
         android:paddingTop="25dp"
         android:text="Medium Text"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="12sp" />
+        android:textSize="18sp" />
 </LinearLayout>

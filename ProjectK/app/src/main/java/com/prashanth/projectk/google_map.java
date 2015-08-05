@@ -1,7 +1,7 @@
-package com.example.prashanth.projectk;
+package com.prashanth.projectk;
 
+import android.app.Activity;
 import android.content.Context;
-import android.location.Criteria;
 import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -10,6 +10,7 @@ import com.backend.GetDataFromServer;
 import com.backend.GetLatLong;
 import com.backend.GlobalAppData;
 import com.backend.UpdatePlacesRunnable;
+import com.example.prashanth.projectk.R;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -17,7 +18,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.List;
 import java.util.Timer;
 
 public class google_map extends FragmentActivity {
@@ -78,15 +78,16 @@ public class google_map extends FragmentActivity {
     private void setUpMap() {
         LocationManager loc = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         globalAppData= (GlobalAppData)getApplication();
+        globalAppData.setContext(google_map.this);
 
         MarkerOptions marker_ops  = new MarkerOptions().position(new LatLng(0,0)).title("current location");
         marker_ops.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-        Marker marker = mMap.addMarker(marker_ops);
+        Marker curr_marker = mMap.addMarker(marker_ops);
 
-        loc.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new GetLatLong(marker,globalAppData));
-
+        loc.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new GetLatLong(curr_marker,globalAppData));
          timer= new Timer();
-        timer.schedule(new UpdatePlacesRunnable(globalAppData),5000,5000);
+        Activity google_map_activity= google_map.this;
+        timer.schedule(new UpdatePlacesRunnable(globalAppData,mMap,google_map_activity),5000,5000);
     }
 
     @Override

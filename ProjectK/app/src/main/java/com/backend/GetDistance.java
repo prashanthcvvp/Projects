@@ -6,11 +6,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 
 public class GetDistance {
 	
-	public void calculateDistance(StringBuilder string_format,double lat1,double longi1){
+	public ArrayList<JSONObject> calculateDistance(StringBuilder string_format,double lat1,double longi1){
 		JSONArray jarray;
+		ArrayList<JSONObject> nearby_places = new ArrayList<JSONObject>();
 		try {
 			jarray = new JSONArray(string_format.toString());
 			for(int i=0;i<jarray.length();i++){
@@ -22,13 +25,15 @@ public class GetDistance {
 					double lat2 = Double.parseDouble(lat_long[1]);
 					double longi2 = -Double.parseDouble(lat_long[0]);
 					double d=haversine(lat1, longi1, lat2, longi2);
-					if(d<100) {
-						Log.d("projectK",String.valueOf(d));
+					if(d<50) {
+						nearby_places.add(jobj);
 					}
 				}
 			}
+			return nearby_places;
 		} catch (JSONException e) {
 			e.printStackTrace();
+			return null;
 		}
 
 	}

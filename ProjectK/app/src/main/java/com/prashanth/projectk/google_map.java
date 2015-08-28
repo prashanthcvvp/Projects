@@ -5,10 +5,14 @@ import android.content.Context;
 import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.backend.GetDataFromServer;
 import com.backend.GetLatLong;
 import com.backend.GlobalAppData;
+import com.backend.Hardware;
 import com.backend.UpdatePlacesRunnable;
 import com.example.prashanth.projectk.R;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,14 +34,12 @@ public class google_map extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_map);
         setUpMapIfNeeded();
+        ActionBarDrawerToggle drawer = new ActionBarDrawerToggle();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        GetDataFromServer get_data_from_server = new GetDataFromServer(globalAppData);
-        get_data_from_server.execute("http://projectk-search1.rhcloud.com/projectk-1.0/get_places");
         setUpMapIfNeeded();
     }
 
@@ -79,26 +81,36 @@ public class google_map extends FragmentActivity {
         LocationManager loc = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         globalAppData= (GlobalAppData)getApplication();
         globalAppData.setContext(google_map.this);
+        Hardware hardware = new Hardware();
+        hardware.gpsCheck(loc,globalAppData);
 
-        MarkerOptions marker_ops  = new MarkerOptions().position(new LatLng(0,0)).title("current location");
-        marker_ops.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-        Marker curr_marker = mMap.addMarker(marker_ops);
+        GetDataFromServer get_data_from_server = new GetDataFromServer(globalAppData);
+        get_data_from_server.execute("http://projectk-search1.rhcloud.com/projectk-1.0/get_places");
 
-        loc.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new GetLatLong(curr_marker,globalAppData));
-         timer= new Timer();
-        Activity google_map_activity= google_map.this;
-        timer.schedule(new UpdatePlacesRunnable(globalAppData,mMap,google_map_activity),5000,5000);
+        if(globalAppData.isGps()) {
+            MarkerOptions marker_ops = new MarkerOptions().position(new LatLng(0, 0)).title("current location");
+            marker_ops.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+            Marker curr_marker = mMap.addMarker(marker_ops);
+
+            loc.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new GetLatLong(curr_marker, globalAppData));
+            timer = new Timer();
+            Activity google_map_activity = google_map.this;
+            timer.schedule(new UpdatePlacesRunnable(globalAppData, mMap, google_map_activity), 5000, 5000);
+        }else{
+            Toast.makeText(getApplicationContext(),"Turn on GPS",Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        timer.cancel();
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        timer.cancel();
+        if(globalAppData.isGps()) {
+            timer.cancel();
+        }
     }
 }

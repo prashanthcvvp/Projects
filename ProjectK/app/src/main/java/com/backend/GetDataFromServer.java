@@ -47,6 +47,8 @@ public class GetDataFromServer extends AsyncTask<String, Void, HashMap<String, S
             }
             this.globalAppData.setJson_string(builder);
             this.globalAppData.setIf_get_place(true);
+            reader.close();
+            http_connection.disconnect();
         } catch (IOException e) {
             e.printStackTrace();
         }

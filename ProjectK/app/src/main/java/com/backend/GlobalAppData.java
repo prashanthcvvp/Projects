@@ -12,6 +12,17 @@ public class GlobalAppData extends Application {
     private StringBuilder json_string;
     private boolean if_get_place=false;
     private Context context;
+    private boolean gps=false;
+
+    public boolean isGps() {
+        return gps;
+    }
+
+    public void setGps(boolean gps) {
+        this.gps = gps;
+    }
+
+
 
 
     public Context getContext() {

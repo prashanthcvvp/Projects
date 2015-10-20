@@ -1,0 +1,47 @@
+<table class="table">
+                <thead>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Number</th>
+                    <th>Action</th>
+                </thead>
+            
+                <tbody>
+                    <tr>
+                        <td>
+                                <input type="text" class="form-control" ng-model="contact.name">
+                        </td>
+                        <td>
+                                <input type="email"class="form-control" ng-model="contact.email">
+                        </td>
+                        <td>
+                                <input type="tel" class="form-control" ng-model="contact.phone">
+                            
+                        </td>
+                        <td>
+                            <div class="btn btn-group">
+                                <a class="btn btn-default" href="#" ng-click="contactsCtrl.addContact(contact)">Register</a>
+                                <a class="btn btn-default" href="#" ng-click="contactsCtrl.updateContact(contact)">Update</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr >
+                        <td colspan="3">
+                            <input type="text" class="form-control" ng-model="filterText" placeholder="Search"/>
+                        </td>
+                    </tr>
+                    <tr ng-repeat="contact in contactsCtrl.getContacts(filterText)|orderBy:'name'|limitTo:10    ">
+                        <td><span class="form-control" ng-cloak>{{contact.name}}</span></td>
+                        <td><span class="form-control"ng-cloak>{{contact.email}}</span></td>
+                        <td><span class="form-control"ng-cloak>{{contact.phone}}</span></td>
+                        
+                        <td>
+                            <div class="btn-group">
+                                <a href="#" class="btn btn-danger" ng-click='contactsCtrl.removeContact(contact._id)'>Remove</a>
+                                <a href="#" class="btn btn-default" ng-click='contactsCtrl.editContact($index)'>Edit</a>
+                            </div>
+                        </td>
+                            
+                    </tr>
+                </tbody>
+            </table>

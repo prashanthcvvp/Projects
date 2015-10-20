@@ -1,0 +1,33 @@
+<!DOCTYPE>
+
+<html ng-app='ContactApp'>
+    <head>
+        <title>Contact List App</title>
+        
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+    </head>
+    <body>
+        <div class="container">
+            <h1>Contact List App</h1><br>
+            <div class='btn-group'>
+                <a href="#/" class='btn btn-default'>Main</a>
+                <a href="#/contacts" class='btn btn-default'>Contacts</a>
+            </div>
+            <div ng-view></div>
+            
+        </div>
+        <script src="https://code.angularjs.org/1.4.0-rc.2/angular.min.js"></script>
+        <script src="https://code.angularjs.org/1.4.0-rc.1/angular-route.min.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        
+        
+        <script src="script/app.min.js"></script>
+    </body>
+</html>
